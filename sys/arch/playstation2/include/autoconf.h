@@ -27,5 +27,7 @@
  */
 
 struct mainbus_attach_args {
-	const char	*ma_name;		/* device name */
+	const char	*ma_name;
+	unsigned long	ma_addr;
+	int		ma_intr;
 };

@@ -188,10 +188,10 @@ bcemul_uimmed_prologue:
 	REG_EPILOGUE
 	jr	ra
 
-#ifndef __mips_o32
+#if !defined(__mips_o32)
 bcemul_daddi:
 	bal	bcemul_immed_prologue
-	daddiu	t0, v0, v1
+	dadd	t0, v0, v1
 	b	bcemul_check_add_overflow
 #endif
 

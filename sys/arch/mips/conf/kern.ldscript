@@ -1,6 +1,7 @@
 /* $NetBSD: kern.ldscript,v 1.7 2011/03/05 15:19:44 matt Exp $ */
 
 /*  ldscript for NetBSD/mips kernels and LKMs */
+OUTPUT_FORMAT("elf32-ntradlittlemips")
 OUTPUT_ARCH(mips)
 ENTRY(_start)
 SEARCH_DIR(/lib);

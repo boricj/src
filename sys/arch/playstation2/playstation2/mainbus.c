@@ -31,54 +31,77 @@ __KERNEL_RCSID(0, "$NetBSD: mainbus.c,v 1.12 2014/03/31 11:25:49 martin Exp $");
 
 #include <sys/param.h>
 #include <sys/systm.h>
+#include <sys/device.h>
+#include <sys/bus.h>
 
 #include <machine/autoconf.h>
 
-static int mainbus_match(struct device *, struct cfdata *, void *);
-static void mainbus_attach(struct device *, struct device *, void *);
-static int mainbus_search(struct device *, struct cfdata *,
-			  const int *, void *);
-static int mainbus_print(void *, const char *);
+static int	mainbus_match(device_t, cfdata_t, void *);
+static void	mainbus_attach(device_t, device_t, void *);
+static int	mainbus_submatch(device_t, cfdata_t, const int *, void *);
+static int	mainbus_print(void *, const char *);
 
-CFATTACH_DECL(mainbus, sizeof(struct device),
+CFATTACH_DECL_NEW(mainbus, 0,
     mainbus_match, mainbus_attach, NULL, NULL);
 
+/* There can be only one. */
+bool mainbus_found;
+
+struct mainbusdev {
+	const char *md_name;
+	bus_addr_t md_addr;
+	int md_intr;
+};
+
+const struct mainbusdev mainbusdevs[] = {
+	{ "cpu",		-1,			-1 },
+	{ NULL,			0,			0 },
+};
+
 static int
-mainbus_match(struct device *parent, struct cfdata *cf, void *aux)
+mainbus_match(device_t parent, cfdata_t match, void *aux)
 {
+	if (mainbus_found)
+		return (0);
 
 	return (1);
 }
 
 static void
-mainbus_attach(struct device *parent, struct device *self, void *aux)
+mainbus_attach(device_t parent, device_t self, void *aux)
 {
-
-	printf("\n");
-
-	/* attach CPU first */
-	config_found(self, &(struct mainbus_attach_args){.ma_name = "cpu"},
-	    mainbus_print);
-
-	config_search_ia(mainbus_search, self, "mainbus", 0);
+	struct mainbus_attach_args ma;
+	const struct mainbusdev *md;
+	for (md = mainbusdevs; md->md_name != NULL; md++) {
+		ma.ma_name = md->md_name;
+		ma.ma_addr = md->md_addr;
+		ma.ma_intr = md->md_intr;
+		(void) config_found_sm_loc(self, "mainbus", NULL, &ma,
+		    mainbus_print, mainbus_submatch);
+	}
 }
 
 static int
-mainbus_search(struct device *parent, struct cfdata *cf,
-	       const int *ldesc, void *aux)
+mainbus_submatch(device_t parent, cfdata_t cf,
+		 const int *ldesc, void *aux)
 {
-	struct mainbus_attach_args ma;
+	struct mainbus_attach_args *ma = aux;
 
-	ma.ma_name = cf->cf_name;
-	if (config_match(parent, cf, &ma))
-		config_attach(parent, cf, &ma, mainbus_print);
-	
-	return (0);
+	return (config_match(parent, cf, ma));
 }
 
 static int
 mainbus_print(void *aux, const char *pnp)
 {
+	struct mainbus_attach_args *ma = aux;
 
-	return (pnp ? QUIET : UNCONF);
+	if (pnp != 0)
+		return QUIET;
+
+	if (pnp)
+		aprint_normal("%s at %s", ma->ma_name, pnp);
+	//if (ma->ma_addr != MAINBUSCF_ADDR_DEFAULT)
+		aprint_normal(" addr 0x%lx", ma->ma_addr);
+
+	return (UNCONF);
 }

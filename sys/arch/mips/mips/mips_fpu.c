@@ -118,7 +118,7 @@ mips_fpu_state_save(lwp_t *l)
 	/*
 	 * save FPCSR and FP register values.
 	 */
-#if !defined(__mips_o32)
+#if !defined(__mips_o32) && !defined(MIPS3_5900)
 	if (tf->tf_regs[_R_SR] & MIPS3_SR_FR) {
 		KASSERT(_MIPS_SIM_NEWABI_P(l->l_proc->p_md.md_abi));
 		fp[32] = fpcsr;
@@ -244,7 +244,7 @@ mips_fpu_state_load(lwp_t *l, u_int flags)
 	/*
 	 * load FP registers and establish processes' FP context.
 	 */
-#if !defined(__mips_o32)
+#if !defined(__mips_o32) && !defined(MIPS3_5900)
 	if (tf->tf_regs[_R_SR] & MIPS3_SR_FR) {
 		KASSERT(_MIPS_SIM_NEWABI_P(l->l_proc->p_md.md_abi));
 		__asm volatile (

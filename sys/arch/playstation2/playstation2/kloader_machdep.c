@@ -37,6 +37,8 @@ __KERNEL_RCSID(0, "$NetBSD: kloader_machdep.c,v 1.5 2014/03/31 11:25:49 martin E
 #include <mips/cache.h>
 #include <machine/kloader.h>
 
+#ifdef KLOADER
+
 kloader_jumpfunc_t kloader_playstation2_jump;
 kloader_bootfunc_t kloader_playstation2_boot;
 void kloader_playstation2_reset(void);
@@ -72,3 +74,4 @@ kloader_playstation2_reset()
 	((void (*)(void))0xbfc00000)();
 	/* NOTREACHED */
 }
+#endif

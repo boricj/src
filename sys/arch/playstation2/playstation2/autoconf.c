@@ -47,7 +47,7 @@ cpu_configure(void)
 	interrupt_init();
 
 	/* Enable SIF BIOS for IOP access */
-	sif_init();
+	//sif_init();
 
 	if (config_rootfound("mainbus", NULL) == NULL)
 		panic("no mainbus found");

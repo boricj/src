@@ -1213,5 +1213,35 @@ mips_emul_sdr(uint32_t inst, struct trapframe *tf, uint32_t cause)
 
 	update_pc(tf, cause);
 }
+
+/** XXX:Instructions not emulated */
+void
+mips_emul_daddi(uint32_t inst, struct trapframe *tf, uint32_t cause)
+{
+	intptr_t	vaddr;
+	uint32_t	a, x, shift;
+	int16_t		offset;
+
+	offset = inst & 0xFFFF;
+	vaddr = tf->tf_regs[(inst>>21)&0x1F] + offset;
+
+	send_sigsegv(vaddr, T_ADDR_ERR_ST, tf, cause);
+	return;
+}
+
+void
+mips_emul_daddiu(uint32_t inst, struct trapframe *tf, uint32_t cause)
+{
+	intptr_t	vaddr;
+	uint32_t	a, x, shift;
+	int16_t		offset;
+
+	offset = inst & 0xFFFF;
+	vaddr = tf->tf_regs[(inst>>21)&0x1F] + offset;
+
+	send_sigsegv(vaddr, T_ADDR_ERR_ST, tf, cause);
+	return;
+}
+
 #endif /* defined(__mips_n32) || defined(__mips_n64) || defined(__mips_o64) */
 #endif /* defined(FPEMUL) */

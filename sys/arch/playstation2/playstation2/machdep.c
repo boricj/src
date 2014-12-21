@@ -63,6 +63,8 @@ __KERNEL_RCSID(0, "$NetBSD: machdep.c,v 1.30 2014/03/31 11:25:49 martin Exp $");
 #include <playstation2/playstation2/sifbios.h>
 #include <playstation2/playstation2/interrupt.h>
 
+#include "../dev/sio.h"
+
 #if defined KLOADER_KERNEL_PATH && !defined KLOADER
 #error "define KLOADER"
 #endif
@@ -70,17 +72,11 @@ __KERNEL_RCSID(0, "$NetBSD: machdep.c,v 1.30 2014/03/31 11:25:49 martin Exp $");
 #include <machine/kloader.h>
 #endif
 
-struct cpu_info cpu_info_store;
-
 struct vm_map *mb_map;
 struct vm_map *phys_map;
 phys_ram_seg_t mem_clusters[VM_PHYSSEG_MAX];
 int mem_cluster_cnt;
-
-#ifdef DEBUG
-static void bootinfo_dump(void);
-#endif
-
+paddr_t avail_start = 0x00010000, avail_end = 0x00200000;
 void mach_init(void);
 /*
  * Do all the stuff that locore normally does before calling main().
@@ -99,18 +95,17 @@ mach_init(void)
 	 * Clear the BSS segment.
 	 */
 	kernend = (void *)mips_round_page(end);
-	memset(edata, 0, kernend - edata);
+	memset(edata, 0, (char*)kernend - (char*)edata);
 
 	/* disable all interrupt */
 	interrupt_init_bootstrap();
 
 	/* enable SIF BIOS */
-	sifbios_init();
+	//sifbios_init();
 
 	consinit();
 
 	printf("kernel_text=%p edata=%p end=%p\n", kernel_text, edata, end);
-
 #ifdef DEBUG
 	bootinfo_dump();
 #endif
@@ -122,7 +117,7 @@ mach_init(void)
 	 * Initialize locore-function vector.
 	 * Clear out the I and D caches.
 	 */
-	mips_vector_init();
+	mips_vector_init(NULL, false);
 
 	/*
 	 * Load the rest of the available pages into the VM system.
@@ -142,27 +137,11 @@ mach_init(void)
 	uvm_page_physload(atop(start), atop(start + size),
 	    atop(start), atop(start + size), VM_FREELIST_DEFAULT);
 
-	strcpy(cpu_model, "SONY PlayStation 2");
+	cpu_setmodel("SONY PlayStation 2");
+}
 
-	/*
-	 * Initialize error message buffer (at end of core).
-	 */
-	mips_init_msgbuf();
-
-	pmap_bootstrap();
-
-	/*
-	 * Allocate uarea page for lwp0 and set it.
-	 */
-	v = uvm_pageboot_alloc(USPACE);
-
-	pcb0 = lwp_getpcb(&lwp0);
-	pcb0->pcb_context[11] = PSL_LOWIPL;	/* SR */
-#ifdef IPL_ICU_MASK
-	pcb0->pcb_ppl = 0;
-#endif
-
-	lwp0.l_md.md_regs = (struct frame *)(v + USPACE) - 1
+void consinit(void) {
+	cn_tab = &siocons;
 }
 
 /*
@@ -178,7 +157,6 @@ cpu_startup(void)
 	 * Good {morning,afternoon,evening,night}.
 	 */
 	printf("%s%s", copyright, version);
-	printf("%s\n", cpu_model);
 	format_bytes(pbuf, sizeof(pbuf), ctob(physmem));
 	printf("total memory = %s\n", pbuf);
 
@@ -227,8 +205,8 @@ cpu_reboot(int howto, char *bootstr)
 #ifndef KLOADER_KERNEL_PATH
 #define	KLOADER_KERNEL_PATH	"/netbsd"
 #endif
-	if ((howto & RB_HALT) == 0)
-		kloader_reboot_setup(KLOADER_KERNEL_PATH);
+/*	if ((howto & RB_HALT) == 0)
+		kloader_reboot_setup(KLOADER_KERNEL_PATH);*/
 #endif
 
 	boothowto = howto;
@@ -253,16 +231,18 @@ cpu_reboot(int howto, char *bootstr)
 
 	pmf_system_shutdown(boothowto);
 
-	if ((howto & RB_POWERDOWN) == RB_POWERDOWN)
-		sifbios_halt(0); /* power down */
-	else if (howto & RB_HALT)
-		sifbios_halt(1); /* halt */
+	if ((howto & RB_POWERDOWN) == RB_POWERDOWN) {
+		///sifbios_halt(0); /* power down */
+	}
+	else if (howto & RB_HALT) {
+		//sifbios_halt(1); /* halt */
+	}
 	else {
 #ifdef KLOADER
 		kloader_reboot();
 		/* NOTREACHED */
 #endif
-		sifbios_halt(2); /* reset */
+		//sifbios_halt(2); /* reset */
 	}
 
 	while (1)

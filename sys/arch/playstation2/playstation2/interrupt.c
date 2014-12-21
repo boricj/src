@@ -71,7 +71,7 @@ STATIC struct {
 } _sif_call_env;
 
 struct clockframe playstation2_clockframe;
-struct playstation2_soft_intr playstation2_soft_intrs[_IPL_NSOFT];
+//struct playstation2_soft_intr playstation2_soft_intrs[_IPL_NSOFT];
 struct playstation2_soft_intrhand *softnet_intrhand;
 
 u_int32_t __icu_mask[_IPL_N];	/* interrupt mask of DMAC/INTC */
@@ -90,18 +90,20 @@ interrupt_init_bootstrap(void)
 	/* initialize interrupt mask (masked all) */
 	for (i = 0; i < _IPL_N; i++)
 		__icu_mask[i] = 0xffffffff;
-
+#if 0
 	/* intialize EE embeded device */
 	timer_init();
 
 	/* clear all pending interrupt and disable all */
 	intc_init(); /* INT0 */
 	dmac_init(); /* INT1 */
+#endif
 }
 
 void
 interrupt_init(void)
 {
+#if 0
 	struct playstation2_soft_intr *asi;
 	int i;
 
@@ -119,13 +121,14 @@ interrupt_init(void)
 	/* enable SIF BIOS access */
 	md_imask = ~D_STAT_CIM_BIT(D_CH5_SIF0);
 	mips_cp0_status_write(0x00010801);
+#endif
 }
 
 /*
  *  Hardware interrupt support
  */
 void
-cpu_intr(u_int32_t status, u_int32_t cause, u_int32_t pc, u_int32_t ipending)
+cpu_intr(int ppl, vaddr_t pc, uint32_t status)
 {
 	struct cpu_info *ci;
 
@@ -135,152 +138,20 @@ cpu_intr(u_int32_t status, u_int32_t cause, u_int32_t pc, u_int32_t ipending)
 
 	ci = curcpu();
 	ci->ci_idepth++;
-	uvmexp.intrs++;
+	//uvmexp.intrs++;
 
-	playstation2_clockframe.ppl = md_imask;
+	//playstation2_clockframe.ppl = md_imask;
 	playstation2_clockframe.sr = status;
 	playstation2_clockframe.pc = pc;
 
-	if (ipending & MIPS_INT_MASK_0) {
+	/*if (ipending & MIPS_INT_MASK_0) {
 		intc_intr(md_imask);
 	}
 	
 	if (ipending & MIPS_INT_MASK_1) {
 		_playstation2_evcnt.dmac.ev_count++;
 		dmac_intr(md_imask);
-	}
+	}*/
 	ci->ci_idepth--;
 }
-void
-setsoft(int ipl)
-{
-	const static int timer_map[] = {
-		[IPL_SOFTCLOCK]	= 1,
-		[IPL_SOFTBIO]	= 2,
-		[IPL_SOFTNET]	= 3,
-		[IPL_SOFTSERIAL]= 3,
-	};
-
-	KDASSERT(ipl >= IPL_SOFTCLOCK && ipl <= IPL_SOFTSERIAL);
-
-	/* kick one shot timer */
-	timer_one_shot(timer_map[ipl]);
-}
-
-/*
- * SPL support
- */
-void
-md_ipl_register(enum ipl_type type, struct _ipl_holder *holder)
-{
-	u_int32_t mask, new;
-	int i;
-
-	mask = (type == IPL_DMAC) ? 0x0000ffff : 0xffff0000;
-
-	for (i = 0; i < _IPL_N; i++) {
-		new = __icu_mask[i];
-		new &= mask;
-		new |= (holder[i].mask & ~mask);
-		__icu_mask[i] = new;
-	}
-}
-
-int
-splraise(int npl)
-{
-	int s, opl;
-
-	s = _intr_suspend();
-	opl = md_imask;
-	md_imask = opl | npl;
-	md_imask_update();
-	_intr_resume(s);
-
-	return (opl);
-}
-
-void
-splset(int npl)
-{
-	int s;
-
-	s = _intr_suspend();
-	md_imask = npl;
-	md_imask_update();
-	_intr_resume(s);
-}
-
-void
-spl0()
-{
-
-	splset(0);
-	_spllower(0);
-}
-
-/*
- * SIF BIOS call of interrupt utility.
- */
-void
-_sif_call_start(void)
-{
-	int s;
-
-	s = _intr_suspend();
-
-	_sif_call_env.sr = mips_cp0_status_read();
-	_sif_call_env.imask = md_imask;
-
-	md_imask = ~D_STAT_CIM_BIT(D_CH5_SIF0);
-	md_imask_update();
-
-	mips_cp0_status_write(0x00010801);
-	dmac_intr_enable(D_CH5_SIF0);
-
-	_intr_resume(s);
-}
-
-void
-_sif_call_end(void)
-{
-	int s;
-
-	s = _intr_suspend();
-
-	md_imask = _sif_call_env.imask;
-	md_imask_update();
-	mips_cp0_status_write(_sif_call_env.sr);
-	
-	_intr_resume(s);
-}
-
-#ifdef INTR_DEBUG
-void
-_debug_print_ipl(void)
-{
-	int i;
-
-	printf("interrupt mask\n");
-	for (i = 0; i < _IPL_N; i++)
-		printf("%d: %08x\n", i, __icu_mask[i]);
-}
-
-void
-_debug_print_intr(const char *ident)
-{
-
-	__gsfb_print(0,
-	    "CLOCK %-5lld SBUS %-5lld DMAC %-5lld "
-
-	    _playstation2_evcnt.clock.ev_count,
-	    _playstation2_evcnt.sbus.ev_count,
-	    _playstation2_evcnt.dmac.ev_count,
-	    playstation2_clockframe.sr, playstation2_clockframe.pc,
-	    md_imask,
-	    (_reg_read_4(I_MASK_REG) << 16) |
-	    (_reg_read_4(I_STAT_REG) & 0x0000ffff),
-	    _reg_read_4(D_STAT_REG), sched_whichqs);
-}
-#endif /* INTR_DEBUG */
 
