@@ -124,7 +124,7 @@
 	.set	noreorder
 	.set	mips3
 
-#ifdef _LP64
+#ifdef _LP64 && !defined(MIPS3_5900)
 #define	_MFC0	dmfc0
 #define	_MTC0	dmtc0
 #else

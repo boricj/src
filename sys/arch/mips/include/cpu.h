@@ -311,7 +311,13 @@ extern struct mips_options mips_options;
 #elif defined(MIPS3) || defined(MIPS4)
 
 # define CPUISMIPS3		1
+
+#if defined(MIPS3_5900)
+# define CPUIS64BITS		0
+#else
 # define CPUIS64BITS		1
+#endif
+
 # define CPUISMIPS32		0
 # define CPUISMIPS32R2		0
 # define CPUISMIPS64		0

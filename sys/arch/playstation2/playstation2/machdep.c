@@ -65,6 +65,10 @@ __KERNEL_RCSID(0, "$NetBSD: machdep.c,v 1.30 2014/03/31 11:25:49 martin Exp $");
 
 #include "../dev/sio.h"
 
+#include <mips/cache.h>
+#include <mips/locore.h>
+#include <mips/cpuregs.h>
+
 #if defined KLOADER_KERNEL_PATH && !defined KLOADER
 #error "define KLOADER"
 #endif
@@ -76,20 +80,19 @@ struct vm_map *mb_map;
 struct vm_map *phys_map;
 phys_ram_seg_t mem_clusters[VM_PHYSSEG_MAX];
 int mem_cluster_cnt;
-paddr_t avail_start = 0x00010000, avail_end = 0x00200000;
+paddr_t avail_start = 0, avail_end = PS2_MEMORY_SIZE - BOOTINFO_BLOCK_SIZE;
 void mach_init(void);
+
 /*
  * Do all the stuff that locore normally does before calling main().
  */
+
 void
 mach_init(void)
 {
 	extern char kernel_text[], edata[], end[];
 	void *kernend;
-	struct pcb *pcb0;
-	vaddr_t v;
-	paddr_t start;
-	size_t size;
+	size_t memstart, memsize;
 
 	/*
 	 * Clear the BSS segment.
@@ -109,35 +112,53 @@ mach_init(void)
 #ifdef DEBUG
 	bootinfo_dump();
 #endif
-	uvm_setpagesize();
-	physmem = atop(PS2_MEMORY_SIZE);
-
 	/*
 	 * Copy exception-dispatch code down to exception vector.
 	 * Initialize locore-function vector.
 	 * Clear out the I and D caches.
 	 */
+	cpu_setmodel("SONY PlayStation 2");
 	mips_vector_init(NULL, false);
+	uvm_setpagesize();
+	physmem = btoc(PS2_MEMORY_SIZE);
 
 	/*
 	 * Load the rest of the available pages into the VM system.
 	 */
-	start = (paddr_t)round_page(MIPS_KSEG0_TO_PHYS(kernend));
-	size = PS2_MEMORY_SIZE - start - BOOTINFO_BLOCK_SIZE;
-	memset((void *)MIPS_PHYS_TO_KSEG1(start), 0, size);
-	    
-	/* kernel itself */
-	mem_clusters[0].start = trunc_page(MIPS_KSEG0_TO_PHYS(kernel_text));
-	mem_clusters[0].size = start - mem_clusters[0].start;
-	/* heap */
-	mem_clusters[1].start = start;
-	mem_clusters[1].size = size;
-	/* load */
-	printf("load memory %#lx, %#x\n", start, size);
-	uvm_page_physload(atop(start), atop(start + size),
-	    atop(start), atop(start + size), VM_FREELIST_DEFAULT);
+	memstart = PS2_MEMORY_EE_RESERVED_SIZE;
+	memsize = PS2_MEMORY_SIZE - PS2_MEMORY_EE_RESERVED_SIZE -
+	    BOOTINFO_BLOCK_SIZE;
 
-	cpu_setmodel("SONY PlayStation 2");
+	/* kernel itself */
+	mem_clusters[0].start = memstart;
+	mem_clusters[0].size = memsize;
+	mem_cluster_cnt = 1;
+
+	mips_page_physload(MIPS_KSEG0_START, (vaddr_t)kernend,
+	    mem_clusters, mem_cluster_cnt, NULL, 0);
+
+	/*
+	 * Initialize message buffer (at end of core).
+	 */
+	mips_init_msgbuf();
+
+	/*
+	 * Initialize the virtual memory system.
+	 */
+	pmap_bootstrap();
+
+	/*
+	 * Allocate uarea page for lwp0 and set it.
+	 */
+	mips_init_lwp0_uarea();
+
+	/*
+	 * Initialize debuggers, and break into them, if appropriate.
+	 */
+#ifdef DDB
+	if (boothowto & RB_KDB)
+		Debugger();
+#endif
 }
 
 void consinit(void) {
@@ -157,6 +178,7 @@ cpu_startup(void)
 	 * Good {morning,afternoon,evening,night}.
 	 */
 	printf("%s%s", copyright, version);
+	printf("%s\n", cpu_getmodel());
 	format_bytes(pbuf, sizeof(pbuf), ctob(physmem));
 	printf("total memory = %s\n", pbuf);
 

@@ -84,6 +84,10 @@ __KERNEL_RCSID(0, "$NetBSD: cache.c,v 1.48 2011/11/24 04:17:11 matt Exp $");
 #include <mips/cache_r3k.h>
 #endif
 
+#ifdef MIPS3_5900
+#include <mips/cache_r5900.h>
+#endif /* MIPS3_5900 */
+
 #ifdef MIPS3_PLUS
 #include <mips/cache_r4k.h>
 #include <mips/cache_r5k.h>
@@ -361,6 +365,40 @@ mips_config_cache_prehistoric(void)
 #endif /* MIPS1 */
 
 #if defined(MIPS3) || defined(MIPS4)
+#if defined(MIPS3_5900)
+	case MIPS_R5900:
+		/* cache spec */
+		mci->mci_picache_ways = 2;
+		mci->mci_pdcache_ways = 2;
+		mci->mci_picache_size = CACHE_R5900_SIZE_I;
+		mci->mci_picache_line_size = CACHE_R5900_LSIZE_I;
+		mci->mci_pdcache_size = CACHE_R5900_SIZE_D;
+		mci->mci_pdcache_line_size = CACHE_R5900_LSIZE_D;
+		mci->mci_cache_alias_mask =
+		    ((mci->mci_pdcache_size / mci->mci_pdcache_ways) - 1) &
+		    ~(PAGE_SIZE - 1);
+		mci->mci_cache_prefer_mask =
+		    max(mci->mci_pdcache_size, mci->mci_picache_size) - 1;
+		/* cache ops */
+		mco->mco_icache_sync_all =
+		    r5900_icache_sync_all_64;
+		mco->mco_icache_sync_range =
+		    r5900_icache_sync_range_64;
+		mco->mco_icache_sync_range_index =
+		    r5900_icache_sync_range_index_64;
+		mco->mco_pdcache_wbinv_all =
+		    r5900_pdcache_wbinv_all_64;
+		mco->mco_pdcache_wbinv_range =
+		    r5900_pdcache_wbinv_range_64;
+		mco->mco_pdcache_wbinv_range_index =
+		    r5900_pdcache_wbinv_range_index_64;
+		mco->mco_pdcache_inv_range =
+		    r5900_pdcache_inv_range_64;
+		mco->mco_pdcache_wb_range =
+		    r5900_pdcache_wb_range_64;
+		break;
+#endif /* MIPS3_5900 */
+
 	case MIPS_R4100:
 		if ((mips3_cp0_config_read() & MIPS3_CONFIG_CS) != 0)
 			csizebase = MIPS3_CONFIG_C_4100BASE;

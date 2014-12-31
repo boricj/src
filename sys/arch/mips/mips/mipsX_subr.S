@@ -159,9 +159,17 @@
 /*
  * Use 64bit cp0 instructions?
  */
+
 #if (MIPS3 + MIPS64 + MIPS64R2) > 0
+#if defined(MIPS3_5900)		/* the 5900 has mips32-like mmu registers */
+#undef	USE_64BIT_FUNCTIONS
+#undef	USE_64BIT_INSTRUCTIONS
+#undef	USE_64BIT_CP0_FUNCTIONS
+#else
+#define	USE_64BIT_FUNCTIONS
 #define	USE_64BIT_INSTRUCTIONS
 #define	USE_64BIT_CP0_FUNCTIONS
+#endif
 #elif (MIPS32 + MIPS32R2) > 0
 #ifdef _LP64
 #error	MIPS32 and MIPS32R2 can't run 64-bit kernels.
@@ -230,11 +238,11 @@
 
 #if defined(MIPS3_LOONGSON2)
 #define	MIPSX(name)	__CONCAT(loongson2_,name)
-#elif defined(MIPS3)
+#elif defined(MIPS3) && !defined(MIPS3_5900)
 #define	MIPSX(name)	__CONCAT(mips3_,name)
 #endif
 
-#if defined(MIPS32)
+#if defined(MIPS32) || defined(MIPS3_5900)
 #define	MIPSX(name)	__CONCAT(mips32_,name)
 #endif
 

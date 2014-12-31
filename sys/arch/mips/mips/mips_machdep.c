@@ -109,7 +109,7 @@
  * software for any purpose.  It is provided "as is" without
  * express or implied warranty.
  */
-
+#define aprint_normal printf
 #include <sys/cdefs.h>			/* RCS ID & Copyright macro defns */
 __KERNEL_RCSID(0, "$NetBSD: mips_machdep.c,v 1.262 2014/11/25 05:28:26 macallan Exp $");
 
@@ -208,7 +208,7 @@ extern const struct locoresw mips1_locoresw;
 extern const mips_locore_jumpvec_t mips1_locore_vec;
 #endif
 
-#if defined(MIPS3)
+#if defined(MIPS3) && !defined(MIPS3_5900)
 static void	mips3_vector_init(const struct splsw *);
 extern const struct locoresw mips3_locoresw;
 extern const mips_locore_jumpvec_t mips3_locore_vec;
@@ -220,7 +220,7 @@ extern const struct locoresw loongson2_locoresw;
 extern const mips_locore_jumpvec_t loongson2_locore_vec;
 #endif
 
-#if defined(MIPS32)
+#if defined(MIPS32) || defined(MIPS3_5900)
 static void	mips32_vector_init(const struct splsw *);
 extern const struct locoresw mips32_locoresw;
 extern const mips_locore_jumpvec_t mips32_locore_vec;
@@ -404,7 +404,7 @@ static const struct pridtab cputab[] = {
 	{ 0, MIPS_R5400, -1, -1,		CPU_ARCH_MIPSx, -1,
 	  MIPS_NOT_SUPP | CPU_MIPS_R4K_MMU, 0, 0,
 						"NEC VR5400 CPU"	},
-	{ 0, MIPS_R5900, -1, -1,		CPU_ARCH_MIPS3, 48,
+	{ 0, MIPS_R5900, -1, -1,		CPU_ARCH_MIPS32, 48,
 	  CPU_MIPS_NO_LLSC | CPU_MIPS_R4K_MMU, 0, 0,
 						"Toshiba R5900 CPU"	},
 
@@ -700,7 +700,7 @@ mips1_vector_init(const struct splsw *splsw)
 }
 #endif /* MIPS1 */
 
-#if defined(MIPS3)
+#if defined(MIPS3) && !defined(MIPS3_5900)
 static void
 mips3_vector_init(const struct splsw *splsw)
 {
@@ -793,7 +793,7 @@ loongson2_vector_init(const struct splsw *splsw)
 }
 #endif /* MIPS3_LOONGSON2 */
 
-#if defined(MIPS32)
+#if defined(MIPS32) || defined(MIPS3_5900)
 static void
 mips32_vector_init(const struct splsw *splsw)
 {
@@ -840,7 +840,9 @@ mips32_vector_init(const struct splsw *splsw)
 	/* Clear BEV in SR so we start handling our own exceptions */
 	mips_cp0_status_write(mips_cp0_status_read() & ~MIPS_SR_BEV);
 
+#if !defined(MIPS3_5900)
 	mips_watchpoint_init();
+#endif
 }
 #endif /* MIPS32 */
 
@@ -1242,7 +1244,7 @@ mips_vector_init(const struct splsw *splsw, bool multicpu_p)
 		mips_locoresw = mips1_locoresw;
 		break;
 #endif
-#if defined(MIPS3)
+#if defined(MIPS3) && !defined(MIPS3_5900)
 	case CPU_ARCH_MIPS3:
 	case CPU_ARCH_MIPS4:
 		mips3_tlb_probe();
@@ -1270,7 +1272,7 @@ mips_vector_init(const struct splsw *splsw, bool multicpu_p)
 		break;
 	
 #endif /* MIPS3 */
-#if defined(MIPS32)
+#if defined(MIPS32) || defined(MIPS3_5900)
 	case CPU_ARCH_MIPS32:
 		mips3_tlb_probe();
 		mips3_cp0_pg_mask_write(MIPS3_PG_SIZE_TO_MASK(PAGE_SIZE));

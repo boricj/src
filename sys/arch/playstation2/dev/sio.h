@@ -17,7 +17,7 @@
 
 #include <dev/cons.h>
 
-#define SIO_BASE	0x1000f100
+#define SIO_BASE	0xb000f100
 
 #define SIO_LCR	0x0 /* Line Control Register. */
 #define SIO_LCR_UMODE_8BIT 0x00 /* UART Mode. */
