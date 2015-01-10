@@ -1215,11 +1215,14 @@ mips_emul_sdr(uint32_t inst, struct trapframe *tf, uint32_t cause)
 }
 
 /** XXX:Instructions not emulated */
+void mips_emul_daddi(uint32_t inst, struct trapframe *tf, uint32_t cause);
+void mips_emul_daddiu(uint32_t inst, struct trapframe *tf, uint32_t cause);
+
 void
 mips_emul_daddi(uint32_t inst, struct trapframe *tf, uint32_t cause)
 {
 	intptr_t	vaddr;
-	uint32_t	a, x, shift;
+//	uint32_t	a, x, shift;
 	int16_t		offset;
 
 	offset = inst & 0xFFFF;
@@ -1233,7 +1236,7 @@ void
 mips_emul_daddiu(uint32_t inst, struct trapframe *tf, uint32_t cause)
 {
 	intptr_t	vaddr;
-	uint32_t	a, x, shift;
+//	uint32_t	a, x, shift;
 	int16_t		offset;
 
 	offset = inst & 0xFFFF;

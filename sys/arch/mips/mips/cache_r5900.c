@@ -56,7 +56,7 @@
 #define	trunc_line(x)		((x) & ~63)
 
 void
-r5900_icache_sync_all_64()
+r5900_icache_sync_all_64(void)
 {
 	vaddr_t va = MIPS_PHYS_TO_KSEG0(0);
 	vaddr_t eva = va + (CACHE_R5900_SIZE_I >> 1); /* 2way */
@@ -122,7 +122,7 @@ r5900_icache_sync_range_index_64(vaddr_t va, vsize_t size)
 }
 
 void
-r5900_pdcache_wbinv_all_64()
+r5900_pdcache_wbinv_all_64(void)
 {
 	vaddr_t va = MIPS_PHYS_TO_KSEG0(0);
 	vaddr_t eva = va + (CACHE_R5900_SIZE_D >> 1); /* 2way */

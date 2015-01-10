@@ -162,7 +162,8 @@ mach_init(void)
 }
 
 void consinit(void) {
-	cn_tab = &siocons;
+	// Force sio for now
+	cn_tab = &constab[0];
 }
 
 /*

@@ -66,9 +66,11 @@ struct _playstation2_evcnt _playstation2_evcnt = {
 	.dmac	= EVCNT_INITIALIZER(EVCNT_TYPE_INTR, NULL, "hard", "dmac"),
 };
 
+/*
 STATIC struct {
 	u_int32_t sr, imask;
 } _sif_call_env;
+*/
 
 struct clockframe playstation2_clockframe;
 //struct playstation2_soft_intr playstation2_soft_intrs[_IPL_NSOFT];

@@ -1,9 +1,10 @@
 #include "sio.h"
 
-struct consdev siocons = {
-	NULL, siocninit, siocngetc, siocnputc, NULL, siocnhalt, siocnflush, NULL,
-	NODEV, CN_NORMAL
-};
+cons_decl(sio);
+
+void    siocnprobe(struct consdev *cp) {
+	cp->cn_pri = CN_NORMAL;
+}
 
 void	siocninit(struct consdev *c) {
 	/*

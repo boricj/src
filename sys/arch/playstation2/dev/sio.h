@@ -55,7 +55,7 @@
 
 #define SIO_RXFIFO	0xc0 /* Receive FIFO. */
 
-#define siocnprobe nullcnprobe
+void	siocnprobe(struct consdev *cp);
 void	siocninit(struct consdev *c);
 int	siocngetc(dev_t d);
 void	siocnputc(dev_t d, int c);

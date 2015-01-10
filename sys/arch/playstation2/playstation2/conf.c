@@ -5,7 +5,6 @@
 #include "../dev/sio.h"
 
 struct consdev constab[] = {
-	&siocons,
+	cons_init(sio),
 	{ 0 },
 };
-
