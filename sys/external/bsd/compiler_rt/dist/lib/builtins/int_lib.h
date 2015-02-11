@@ -59,6 +59,8 @@
 /* Include internal utility function declarations. */
 #include "int_util.h"
 
+COMPILER_RT_ABI si_int __clzsi2(si_int a);
+
 COMPILER_RT_ABI si_int __paritysi2(si_int a);
 COMPILER_RT_ABI si_int __paritydi2(di_int a);
 

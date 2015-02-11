@@ -8,6 +8,7 @@ maxusers 2 8 64
 defflag	debug_playstation2.h		GSFB_DEBUG_MONITOR INTR_DEBUG SIF_DEBUG
 					SMAP_DEBUG EMAC3_DEBUG
 
+# System bus
 device mainbus {}
 attach mainbus at root
 file arch/playstation2/playstation2/mainbus.c		mainbus
@@ -16,8 +17,8 @@ device cpu
 attach cpu at mainbus
 file arch/playstation2/playstation2/cpu.c		cpu
 
-file arch/mips/mips/mips3_clock.c
-file arch/mips/mips/mips3_clockintr.c
+file arch/mips/mips/mips3_clock.c	mips3
+file arch/mips/mips/mips3_clockintr.c	mips3
 file arch/mips/mips/cache_r5900.c
 file arch/mips/mips/mips5900_subr.S
 
@@ -35,6 +36,9 @@ file arch/playstation2/playstation2/interrupt.c
 file arch/playstation2/playstation2/locore_machdep.S
 file arch/playstation2/playstation2/machdep.c
 file arch/playstation2/dev/sio.c
+file arch/playstation2/playstation2/clock.c
+file arch/playstation2/ee/timer.c
+file arch/playstation2/ee/intc.c
 
 file	dev/cons.c
 file	dev/cninit.c

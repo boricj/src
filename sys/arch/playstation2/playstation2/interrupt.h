@@ -44,10 +44,8 @@ struct _ipl_holder {
 	u_int32_t mask;
 };
 
-struct _playstation2_evcnt {
-	struct evcnt clock, sbus, dmac;
-};
-extern struct _playstation2_evcnt  _playstation2_evcnt;
+//extern krndsource_t rndsource_clock;
+
 extern struct clockframe playstation2_clockframe;
 
 void interrupt_init_bootstrap(void);

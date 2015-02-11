@@ -27,3 +27,4 @@ options 	MEMORY_DISK_RBFLAGS=RB_SINGLE	# boot in single-user mode
 # Reboot from HDD
 options 	KLOADER_KERNEL_PATH="\"/mnt/netbsd\""
 options 	KLOADER
+

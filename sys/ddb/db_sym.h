@@ -104,7 +104,7 @@ void		db_symbol_values(db_sym_t, const char **, db_expr_t *);
 					/* return name and value of symbol */
 
 #define db_find_sym_and_offset(val,namep,offp)	\
-	db_symbol_values(db_search_symbol(val,DB_STGY_ANY,offp),namep,0)
+	db_symbol_values(db_search_symbol(val,DB_STGY_ANY,(db_expr_t *)offp),namep,0)
 					/* find name&value given approx val */
 
 #define db_find_xtrn_sym_and_offset(val,namep,offp)	\

@@ -62,7 +62,7 @@ __KERNEL_RCSID(0, "$NetBSD: machdep.c,v 1.30 2014/03/31 11:25:49 martin Exp $");
 #include <machine/intr.h>/* hardintr_init */
 #include <playstation2/playstation2/sifbios.h>
 #include <playstation2/playstation2/interrupt.h>
-
+#include <playstation2/ee/timervar.h>
 #include "../dev/sio.h"
 
 #include <mips/cache.h>
@@ -169,35 +169,24 @@ void consinit(void) {
 /*
  * Allocate memory for variable-sized tables,
  */
+
+#include <sys/rnd.h>
+
+extern rndsave_t *boot_rsp;
+rndsave_t boot_rsp_data;
+
 void
 cpu_startup(void)
 {
-	vaddr_t minaddr, maxaddr;
-	char pbuf[9];
-
 	/*
-	 * Good {morning,afternoon,evening,night}.
+	 * Do the common startup items.
 	 */
-	printf("%s%s", copyright, version);
-	printf("%s\n", cpu_getmodel());
-	format_bytes(pbuf, sizeof(pbuf), ctob(physmem));
-	printf("total memory = %s\n", pbuf);
+	cpu_startup_common();
 
-	minaddr = 0;
-	/*
-	 * Allocate a submap for physio.
-	 */
-	phys_map = uvm_km_suballoc(kernel_map, &minaddr, &maxaddr,
-	    VM_PHYS_SIZE, 0, false, NULL);
-
-	/*
-	 * (No need to allocate an mbuf cluster submap.  Mbuf clusters
-	 * are allocated via the pool allocator, and we use KSEG to
-	 * map those pages.)
-	 */
-
-	format_bytes(pbuf, sizeof(pbuf), ptoa(uvmexp.free));
-	printf("avail memory = %s\n", pbuf);
+	/* XXX:Pretend that the early startup code is a source of randomness */
+	boot_rsp = &boot_rsp_data;
+	boot_rsp_data.entropy=128;
+	memcpy(&boot_rsp_data.data, (char*)0x80100000, sizeof(boot_rsp_data.data));
 }
 
 void

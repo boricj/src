@@ -59,13 +59,13 @@ __KERNEL_RCSID(0, "$NetBSD: interrupt.c,v 1.11 2014/03/31 11:25:49 martin Exp $"
 #else
 #define STATIC static
 #endif
-
+/*
 struct _playstation2_evcnt _playstation2_evcnt = {
 	.clock	= EVCNT_INITIALIZER(EVCNT_TYPE_INTR, NULL, "hard", "clock"),
 	.sbus	= EVCNT_INITIALIZER(EVCNT_TYPE_INTR, NULL, "hard", "sbus"),
 	.dmac	= EVCNT_INITIALIZER(EVCNT_TYPE_INTR, NULL, "hard", "dmac"),
 };
-
+*/
 /*
 STATIC struct {
 	u_int32_t sr, imask;

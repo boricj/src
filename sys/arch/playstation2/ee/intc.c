@@ -192,7 +192,7 @@ intc_intr_establish(enum intc_channel ch, int ipl, int (*func)(void *),
 		}
 	}
 
-	md_ipl_register(IPL_INTC, __intc_ipl_holder);
+	//md_ipl_register(IPL_INTC, __intc_ipl_holder);
 
 	intc_intr_enable(ch);
 	__intc_enabled_channel |= bit;
@@ -222,7 +222,7 @@ intc_intr_disestablish(void *handle)
 	for (i = 0; i < _IPL_N; i++)
 		__intc_ipl_holder[i].mask |= bit;
 
-	md_ipl_register(IPL_INTC, __intc_ipl_holder);
+	//md_ipl_register(IPL_INTC, __intc_ipl_holder);
 	__intc_enabled_channel &= ~bit;
 
 	_intr_resume(s);

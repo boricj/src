@@ -6,6 +6,7 @@ makeoptions	MACHINE_ARCH="mipsel"
 
 options 	MIPS3
 options 	MIPS3_5900
+options		MIPS3_ENABLE_CLOCK_INTR
 
 options 	IPL_ICU_MASK
 

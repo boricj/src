@@ -8,8 +8,16 @@ maxusers	8
 makeoptions     COPTS="-Os"
 
 makeoptions	DEBUG="-g"	# compile full symbol table
-options		DIAGNOSTIC
-options		SYSCTL_DEBUG_CREATE
+
+# Debugging options
+options 	DIAGNOSTIC
+#options 	DEBUG
+options 	DDB		# in-kernel debugger
+options 	DDB_ONPANIC=1	# see also sysctl(7): `ddb.onpanic'
+options 	DDB_HISTORY_SIZE=64	# enable history editing in DDB
+options		DDB_TRACE
+#options 	SYSCTL_DEBUG_CREATE
+#options 	RND_VERBOSE
 
 #options 	NTP		# NTP phase/frequency locked loop
 #options 	COMPAT_BSDPTY	# /dev/[pt]ty?? ptys.
@@ -42,5 +50,5 @@ options 	WS_KERNEL_BG=WSCOL_BLUE
 
 mainbus0	at root
 
-cpu0	at mainbus?
+cpu0		at mainbus?
 

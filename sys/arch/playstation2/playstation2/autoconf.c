@@ -40,6 +40,7 @@ __KERNEL_RCSID(0, "$NetBSD: autoconf.c,v 1.9 2014/07/04 07:27:57 martin Exp $");
 void
 cpu_configure(void)
 {
+#if 0
 	/*
 	 * During autoconfiguration, SIF BIOS uses DMAC SIF0 interrupt.
 	 * so enable DMAC interrupt here. (EIE | INT1 | IE)
@@ -54,6 +55,13 @@ cpu_configure(void)
 
 	/* Enable all interrupts */
 	spl0();
+#endif
+//	intr_init();
+
+	/* Kick off autoconfiguration. */
+	(void)splhigh();
+	if (config_rootfound("mainbus", NULL) == NULL)
+		panic("no mainbus found");
 }
 
 void

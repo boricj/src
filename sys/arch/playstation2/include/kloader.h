@@ -30,3 +30,8 @@
 #define	KLOADER_NO_BOOTINFO
 #define PG_VADDR(pg)	MIPS_PHYS_TO_KSEG0(VM_PAGE_TO_PHYS(pg))
 #include <dev/kloader.h>
+
+#ifdef DEBUG
+void bootinfo_dump(void);
+#endif
+

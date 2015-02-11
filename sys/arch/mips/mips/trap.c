@@ -812,14 +812,14 @@ extern char mips1_kern_intr[];
 extern char mips1_user_intr[];
 extern char mips1_systemcall[];
 #endif
-#ifdef MIPS3
+#if defined(MIPS3) && !defined(MIPS3_5900)
 extern char mips3_kern_gen_exception[];
 extern char mips3_user_gen_exception[];
 extern char mips3_kern_intr[];
 extern char mips3_user_intr[];
 extern char mips3_systemcall[];
 #endif
-#ifdef MIPS32
+#if defined(MIPS32) || defined(MIPS3_5900)
 extern char mips32_kern_gen_exception[];
 extern char mips32_user_gen_exception[];
 extern char mips32_kern_intr[];
@@ -1122,7 +1122,7 @@ const static struct { void *addr; const char *name;} names[] = {
 	Name(mips1_user_intr),
 #endif	/* MIPS1 */
 
-#if defined(MIPS3)			/* r4000 family (mips-III CPU) */
+#if defined(MIPS3) && !defined(MIPS3_5900)		/* r4000 family (mips-III CPU) */
 	Name(mips3_kern_gen_exception),
 	Name(mips3_user_gen_exception),
 	Name(mips3_systemcall),
@@ -1130,7 +1130,7 @@ const static struct { void *addr; const char *name;} names[] = {
 	Name(mips3_user_intr),
 #endif	/* MIPS3 */
 
-#if defined(MIPS32)			/* MIPS32 family (mips-III CPU) */
+#if defined(MIPS32) || defined(MIPS3_5900)		/* MIPS32 family (mips-III CPU) */
 	Name(mips32_kern_gen_exception),
 	Name(mips32_user_gen_exception),
 	Name(mips32_systemcall),
