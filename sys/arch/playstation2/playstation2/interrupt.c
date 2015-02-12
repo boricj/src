@@ -50,6 +50,8 @@ __KERNEL_RCSID(0, "$NetBSD: interrupt.c,v 1.11 2014/03/31 11:25:49 martin Exp $"
 #include <playstation2/ee/dmacvar.h>
 #include <playstation2/ee/timervar.h>
 
+#include <playstation2/dev/sio.h>
+
 #ifdef INTR_DEBUG
 #include <playstation2/ee/gsvar.h>	/* debug monitor */
 #endif
@@ -133,7 +135,6 @@ void
 cpu_intr(int ppl, vaddr_t pc, uint32_t status)
 {
 	struct cpu_info *ci;
-
 #if 0
 	_debug_print_intr(__func__);
 #endif

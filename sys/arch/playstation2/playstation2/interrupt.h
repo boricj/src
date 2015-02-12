@@ -44,8 +44,6 @@ struct _ipl_holder {
 	u_int32_t mask;
 };
 
-//extern krndsource_t rndsource_clock;
-
 extern struct clockframe playstation2_clockframe;
 
 void interrupt_init_bootstrap(void);

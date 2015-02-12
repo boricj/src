@@ -67,7 +67,6 @@ cpu_configure(void)
 void
 cpu_rootconf(void)
 {
-
 	setroot(NULL, 0);
 }
 

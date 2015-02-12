@@ -36,8 +36,6 @@ __KERNEL_RCSID(0, "$NetBSD: timer.c,v 1.8 2014/03/31 11:25:49 martin Exp $");
 
 #include <sys/param.h>
 #include <sys/systm.h>
-#include <sys/rnd.h>
-
 #include <playstation2/playstation2/interrupt.h>
 
 #include <playstation2/ee/eevar.h>
@@ -62,8 +60,6 @@ STATIC int timer0_intr(void *);
  *	3 ... for IPL_SOFTNET, IPL_SOFTSERIAL
  */
 
-krndsource_t rndsource_clock;
-
 void
 timer_init(void)
 {
@@ -77,8 +73,6 @@ void
 timer_clock_init(void)
 {
 	/* clock interrupt (296.912MHz / 2 / 256) * 5760 = 100Hz */
-	rnd_attach_source(&rndsource_clock, "EE Timer",
-         RND_TYPE_ENV, RND_FLAG_DEFAULT);
 	intc_intr_establish(I_CH9_TIMER0, IPL_CLOCK, timer0_intr, 0);
 	_reg_write_4(T0_COUNT_REG, 0);
 	_reg_write_4(T0_COMP_REG, 5760);
@@ -102,11 +96,9 @@ timer_one_shot(int timer)
 int
 timer0_intr(void *arg)
 {
-
 	_reg_write_4(T0_MODE_REG, _reg_read_4(T0_MODE_REG) | T_MODE_EQUF);
 
 	//_playstation2_evcnt.clock.ev_count++;
-	rnd_add_uint32(&rndsource_clock, *(volatile uint32_t*)T0_COUNT_REG);
 
 	hardclock(&playstation2_clockframe);
 
@@ -117,7 +109,6 @@ timer0_intr(void *arg)
 int
 timer1_intr(void *arg)
 {
-
 	_reg_write_4(T1_MODE_REG, T_MODE_EQUF | T_MODE_OVFF);
 
 #ifdef __HAVE_FAST_SOFTINTS
@@ -130,7 +121,6 @@ timer1_intr(void *arg)
 int
 timer2_intr(void *arg)
 {
-
 	_reg_write_4(T2_MODE_REG, T_MODE_EQUF | T_MODE_OVFF);
 
 #ifdef __HAVE_FAST_SOFTINTS
@@ -142,7 +132,6 @@ timer2_intr(void *arg)
 int
 timer3_intr(void *arg)
 {
-
 	_reg_write_4(T3_MODE_REG, T_MODE_EQUF | T_MODE_OVFF);
 
 #ifdef __HAVE_FAST_SOFTINTS

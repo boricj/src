@@ -101,7 +101,7 @@ mach_init(void)
 	memset(edata, 0, (char*)kernend - (char*)edata);
 
 	/* disable all interrupt */
-	interrupt_init_bootstrap();
+	//interrupt_init_bootstrap();
 
 	/* enable SIF BIOS */
 	//sifbios_init();
@@ -182,6 +182,9 @@ cpu_startup(void)
 	 * Do the common startup items.
 	 */
 	cpu_startup_common();
+
+	//interrupt_init();
+	splsched();
 
 	/* XXX:Pretend that the early startup code is a source of randomness */
 	boot_rsp = &boot_rsp_data;
