@@ -31,35 +31,29 @@ __KERNEL_RCSID(0, "$NetBSD: cpu.c,v 1.9 2014/07/04 08:33:08 martin Exp $");
 #include <sys/param.h>
 #include <sys/systm.h>
 #include <sys/device.h>
+#include <sys/cpu.h>
 
 #include <machine/autoconf.h>
 
-static int cpumatch(device_t, cfdata_t, void *);
-static void cpuattach(device_t, device_t, void *);
+static int	cpu_match(device_t, cfdata_t, void *);
+static void	cpu_attach(device_t, device_t, void *);
 
-CFATTACH_DECL_NEW(cpu, 0, cpumatch, cpuattach, NULL, NULL);
-
-extern struct cfdriver cpu_cd;
-static int __attached; /* PlayStation 2 has only one CPU */
+CFATTACH_DECL_NEW(cpu, 0, cpu_match, cpu_attach, NULL, NULL);
 
 static int
-cpumatch(device_t parent, cfdata_t cf, void *aux)
+cpu_match(device_t parent, cfdata_t cf, void *aux)
 {
-	struct mainbus_attach_args *ma = aux;
-
-	/* make sure that we're looking for a CPU. */
-	if (strcmp(ma->ma_name, cpu_cd.cd_name) != 0)
-		return (0);
-
-	return (!__attached);
+	return 1;
 }
 
 static void
-cpuattach(struct device *parent, struct device *self, void *aux)
+cpu_attach(struct device *parent, struct device *self, void *aux)
 {
-
-	printf(": ");
-	__attached = 1;
-
+	aprint_normal(": ");
 	cpu_identify(self);
+}
+
+void
+cpu_intr(int ppl, vaddr_t pc, uint32_t status)
+{
 }

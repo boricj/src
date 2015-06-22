@@ -662,7 +662,7 @@ END(baderr64)
  * and ASID bits are implemented.  Assumes that interrupts are disabled.
  */
 LEAF(mips3_cp0_tlb_entry_hi_probe)
-	dmfc0	t0, MIPS_COP_0_TLB_HI
+	_MFC0	t0, MIPS_COP_0_TLB_HI
 	li	v0, -1		/* all 1s */
 #if defined(__mips_isa_rev) && __mips_isa_rev >= 2
 	dinsu	v0, zero, 62, 2
@@ -670,10 +670,10 @@ LEAF(mips3_cp0_tlb_entry_hi_probe)
 	dsll	v0, v0, 2	/* except the top 2 */
 	dsrl	v0, v0, 2
 #endif
-	dmtc0	v0, MIPS_COP_0_TLB_HI
+	_MTC0	v0, MIPS_COP_0_TLB_HI
 	COP0_SYNC
-	dmfc0	v0, MIPS_COP_0_TLB_HI
-	dmtc0	t0, MIPS_COP_0_TLB_HI
+	_MFC0	v0, MIPS_COP_0_TLB_HI
+	_MTC0	t0, MIPS_COP_0_TLB_HI
 	COP0_SYNC
 	nop
 #ifdef __mips_o32
@@ -698,12 +698,12 @@ END(mips3_cp0_tlb_entry_hi_probe)
  * PA bits are implemented.  Assumes that interrupts are disabled.
  */
 LEAF(mips3_cp0_tlb_entry_lo_probe)
-	dmfc0	t0, MIPS_COP_0_TLB_LO0
+	_MFC0	t0, MIPS_COP_0_TLB_LO0
 	li	v0, -64		/* all 1s except low 6 bits */
-	dmtc0	v0, MIPS_COP_0_TLB_LO0
+	_MTC0	v0, MIPS_COP_0_TLB_LO0
 	COP0_SYNC
-	dmfc0	v0, MIPS_COP_0_TLB_LO0
-	dmtc0	t0, MIPS_COP_0_TLB_LO0
+	_MFC0	v0, MIPS_COP_0_TLB_LO0
+	_MTC0	t0, MIPS_COP_0_TLB_LO0
 	COP0_SYNC
 #ifdef __mips_o32
 #if BYTE_ORDER == BIG_ENDIAN

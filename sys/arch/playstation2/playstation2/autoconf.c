@@ -34,20 +34,10 @@ __KERNEL_RCSID(0, "$NetBSD: autoconf.c,v 1.9 2014/07/04 07:27:57 martin Exp $");
 #include <sys/device.h>
 #include <sys/conf.h>
 
-#include <playstation2/ee/sifvar.h>			/* sif_init */
-#include <playstation2/playstation2/interrupt.h>	/* interrupt_init */
-
 void
 cpu_configure(void)
 {
-	/*
-	 * During autoconfiguration, SIF BIOS uses DMAC SIF0 interrupt.
-	 * so enable DMAC interrupt here. (EIE | INT1 | IE)
-	 */
-	interrupt_init();
-
-	/* Enable SIF BIOS for IOP access */
-	sif_init();
+	(void)splhigh();
 
 	if (config_rootfound("mainbus", NULL) == NULL)
 		panic("no mainbus found");
@@ -59,7 +49,5 @@ cpu_configure(void)
 void
 cpu_rootconf(void)
 {
-
-	setroot(NULL, 0);
+	rootconf();
 }
-

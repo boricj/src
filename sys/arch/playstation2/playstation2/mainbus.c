@@ -31,40 +31,35 @@ __KERNEL_RCSID(0, "$NetBSD: mainbus.c,v 1.12 2014/03/31 11:25:49 martin Exp $");
 
 #include <sys/param.h>
 #include <sys/systm.h>
+#include <sys/device.h>
+
+#include <mips/cpuregs.h>
 
 #include <machine/autoconf.h>
 
-static int mainbus_match(struct device *, struct cfdata *, void *);
-static void mainbus_attach(struct device *, struct device *, void *);
-static int mainbus_search(struct device *, struct cfdata *,
-			  const int *, void *);
-static int mainbus_print(void *, const char *);
+static int	mainbus_match(device_t, cfdata_t, void *);
+static void	mainbus_attach(device_t, device_t, void *);
+static int	mainbus_search(device_t, cfdata_t, const int *, void *);
+int		mainbus_print(void *, const char *);
 
-CFATTACH_DECL(mainbus, sizeof(struct device),
+CFATTACH_DECL_NEW(mainbus, 0,
     mainbus_match, mainbus_attach, NULL, NULL);
 
 static int
-mainbus_match(struct device *parent, struct cfdata *cf, void *aux)
+mainbus_match(device_t parent, cfdata_t cf, void *aux)
 {
-
-	return (1);
+	return 1;
 }
 
 static void
-mainbus_attach(struct device *parent, struct device *self, void *aux)
+mainbus_attach(device_t parent, device_t self, void *aux)
 {
-
-	printf("\n");
-
-	/* attach CPU first */
-	config_found(self, &(struct mainbus_attach_args){.ma_name = "cpu"},
-	    mainbus_print);
-
+	aprint_normal("\n");
 	config_search_ia(mainbus_search, self, "mainbus", 0);
 }
 
 static int
-mainbus_search(struct device *parent, struct cfdata *cf,
+mainbus_search(device_t parent, cfdata_t cf,
 	       const int *ldesc, void *aux)
 {
 	struct mainbus_attach_args ma;
@@ -72,13 +67,12 @@ mainbus_search(struct device *parent, struct cfdata *cf,
 	ma.ma_name = cf->cf_name;
 	if (config_match(parent, cf, &ma))
 		config_attach(parent, cf, &ma, mainbus_print);
-	
+
 	return (0);
 }
 
-static int
+int
 mainbus_print(void *aux, const char *pnp)
 {
-
 	return (pnp ? QUIET : UNCONF);
 }

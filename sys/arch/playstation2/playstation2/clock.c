@@ -39,63 +39,8 @@ __KERNEL_RCSID(0, "$NetBSD: clock.c,v 1.11 2014/11/20 16:34:25 christos Exp $");
 #include <mips/locore.h>
 #include <mips/mips3_clock.h>
 
-#include <dev/clock_subr.h>
-#include <machine/bootinfo.h>
-
-#include <playstation2/ee/timervar.h>
-
-static int get_bootinfo_tod(todr_chip_handle_t, struct clock_ymdhms *);
-
 void
 cpu_initclocks(void)
 {
-	struct todr_chip_handle	todr = {
-		.todr_gettime_ymdhms = get_bootinfo_tod,
-	};
-
-	/*
-	 *  PS2 R5900 CPU clock is 294.912 MHz = (1 << 15) * 9 * 1000
-	 */
-	curcpu()->ci_cpu_freq = 294912000;
-
-	hz = 100;
-
-	/* Install clock interrupt */
-	timer_clock_init();
-
-	todr_attach(&todr);
-
-	mips3_init_tc();
-}
-
-void
-setstatclockrate(int arg)
-{
-	/* not yet */
-}
-
-static int
-get_bootinfo_tod(todr_chip_handle_t tch, struct clock_ymdhms *dt)
-{
-	time_t utc;
-	struct bootinfo_rtc *rtc = 
-	    (void *)MIPS_PHYS_TO_KSEG1(BOOTINFO_BLOCK_BASE + BOOTINFO_RTC);
-
-	/* PS2 RTC is JST */
-	dt->dt_year = bcdtobin(rtc->year) + 2000;
-	dt->dt_mon = bcdtobin(rtc->mon);
-	dt->dt_day = bcdtobin(rtc->day);
-	dt->dt_hour = bcdtobin(rtc->hour);
-	dt->dt_min = bcdtobin(rtc->min);
-	dt->dt_sec = bcdtobin(rtc->sec);
-
-	/* convert to UTC */
-	utc = clock_ymdhms_to_secs(dt) - 9*60*60;
-	clock_secs_to_ymdhms(utc, dt);
-#ifdef DEBUG
-        printf("bootinfo: %d/%d/%d/%d/%d/%d rtc_offset %d\n", dt->dt_year,
-	    dt->dt_mon, dt->dt_day, dt->dt_hour, dt->dt_min, dt->dt_sec,
-	    rtc_offset);
-#endif
-	return 0;
+	mips3_initclocks();
 }

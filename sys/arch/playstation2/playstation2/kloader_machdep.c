@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if 0
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: kloader_machdep.c,v 1.5 2014/03/31 11:25:49 martin Exp $");
 
@@ -72,3 +72,4 @@ kloader_playstation2_reset()
 	((void (*)(void))0xbfc00000)();
 	/* NOTREACHED */
 }
+#endif

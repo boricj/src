@@ -25,10 +25,116 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: machdep.c,v 1.30 2014/03/31 11:25:49 martin Exp $");
 
+#include <sys/param.h>
+#include <sys/boot_flag.h>
+#include <sys/device.h>
+#include <sys/kernel.h>
+#include <sys/kcore.h>
+#include <sys/ksyms.h>
+#include <sys/mount.h>
+#include <sys/reboot.h>
+#include <sys/cpu.h>
+#include <sys/bus.h>
+
+#include <uvm/uvm_extern.h>
+
+#include <mips/cache.h>
+#include <mips/locore.h>
+#include <mips/cpuregs.h>
+
+#include <playstation2/bootinfo.h>
+
+void	mach_init(void);
+
+int mem_cluster_cnt;
+phys_ram_seg_t mem_clusters[VM_PHYSSEG_MAX];
+struct vm_map *phys_map;
+
+void
+mach_init(void)
+{
+	void *kernend;
+	uint32_t memsize;
+	extern char edata[], end[];	/* XXX */
+
+	/* clear the BSS segment */
+	kernend = (void *)mips_round_page(end);
+
+	memset(edata, 0, (char *)kernend - edata);
+
+	/* setup early console */
+	consinit();
+
+	/* set CPU model info for sysctl_hw */
+	cpu_setmodel("SONY PlayStation 2");
+	mips_vector_init(NULL, false);
+	uvm_setpagesize();
+
+#if 0
+#ifdef DEBUG
+	bootinfo_dump();
+#endif
+#endif
+
+	memsize = PS2_MEMORY_SIZE;
+
+	printf("Memory size: 0x%08x\n", memsize);
+	physmem = btoc(memsize);
+
+	/*
+	 * memory is at 0x20000000 with first 256MB mirrored to 0x00000000 so
+	 * we can see them through KSEG*
+	 * assume 1GB for now, the SoC can theoretically support up to 3GB
+	 */
+	mem_clusters[0].start = PAGE_SIZE;
+	mem_clusters[0].size = memsize - PAGE_SIZE - BOOTINFO_BLOCK_SIZE;
+	mem_cluster_cnt = 1;
+
+	/*
+	 * Load the available pages into the VM system.
+	 */
+	mips_page_physload(MIPS_KSEG0_START, (vaddr_t)kernend,
+	    mem_clusters, mem_cluster_cnt, NULL, 0);
+
+	/*
+	 * Initialize message buffer (at end of core).
+	 */
+	mips_init_msgbuf();
+
+	/*
+	 * Initialize the virtual memory system.
+	 */
+	pmap_bootstrap();
+
+	/*
+	 * Allocate uarea page for lwp0 and set it.
+	 */
+	mips_init_lwp0_uarea();
+}
+
+void
+cpu_startup(void)
+{
+	/*
+	* Do the common startup items.
+	*/
+	cpu_startup_common();
+
+	splsched();
+}
+
+void
+cpu_reboot(int howto, char *bootstr)
+{
+	(void)howto;
+	(void)bootstr;
+	while (1);
+}
+
+#if 0
 #include "opt_ddb.h"
 #include "opt_kloader.h"
 #include "opt_kloader_kernel_path.h"
@@ -130,7 +236,7 @@ mach_init(void)
 	start = (paddr_t)round_page(MIPS_KSEG0_TO_PHYS(kernend));
 	size = PS2_MEMORY_SIZE - start - BOOTINFO_BLOCK_SIZE;
 	memset((void *)MIPS_PHYS_TO_KSEG1(start), 0, size);
-	    
+
 	/* kernel itself */
 	mem_clusters[0].start = trunc_page(MIPS_KSEG0_TO_PHYS(kernel_text));
 	mem_clusters[0].size = start - mem_clusters[0].start;
@@ -279,7 +385,8 @@ bootinfo_dump(void)
 	    BOOTINFO_REF(BOOTINFO_DEVCONF),
 	    BOOTINFO_REF(BOOTINFO_OPTION_PTR),
 	    BOOTINFO_REF(BOOTINFO_RTC),
-	    BOOTINFO_REF(BOOTINFO_PCMCIA_TYPE),	
+	    BOOTINFO_REF(BOOTINFO_PCMCIA_TYPE),
 	    BOOTINFO_REF(BOOTINFO_SYSCONF));
 }
 #endif /* DEBUG */
+#endif

@@ -26,6 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/bus.h>
+#include <sys/device.h>
+#include <sys/param.h>
+#include <dev/cons.h>
+
+#include "../dev/eesio.h"
+
+void
+consinit(void)
+{
+	cn_tab = &eesiocons;
+}
+
+#if 0
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: console.c,v 1.7 2014/03/31 11:25:49 martin Exp $");
 
@@ -61,3 +75,4 @@ consinit(void)
 #endif
 	initialize = 0;
 }
+#endif

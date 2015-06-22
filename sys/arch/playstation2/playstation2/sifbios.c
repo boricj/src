@@ -28,7 +28,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if 0
 /*
  * PlayStation 2 SIF BIOS Version 2.0 interface.
  */
@@ -64,7 +64,7 @@ sifbios_init(void)
 	/* check BIOS exits */
 	if (*(u_int32_t *)SIFBIOS_SIGNATURE_PTR != SIFBIOS_SIGNATURE)
 		panic("SIFBIOS not found");
-	
+
 	__sifbios_call = *((int (**)(int, void*))SIFBIOS_ENTRY_PTR);
 }
 
@@ -83,7 +83,7 @@ sifbios_rpc_call(int callno, void *arg, int *result)
 		callback:	sifbios_rpc_callback,
 		callback_arg:	(volatile void *)&done,
 	};
-	
+
 	/* call SIF BIOS */
 	retry = 100;
 	while (CALL(int, callno, &sifbios_arg) != 0 && --retry > 0)
@@ -105,7 +105,7 @@ sifbios_rpc_call(int callno, void *arg, int *result)
 		printf("IOP not respond (callno = %d)\n", callno);
 		goto error;
 	}
-	
+
 	*result = sifbios_arg.result;
 
 	return (0);
@@ -118,7 +118,7 @@ void
 sifbios_rpc_callback(void *arg, int result)
 {
 	int *done = (int *)arg;
-	
+
 	*done = 1;
 }
 
@@ -195,8 +195,8 @@ sifdma_queue(struct sifdma_transfer *arg, int n)
 	return CALL(sifdma_id_t, 18, &sifbios_arg);
 }
 
-/* 
- * status of DMA 
+/*
+ * status of DMA
  *	>0 ... queued. not kicked.
  *	 0 ... DMA executing.
  *	<0 ... DMA done.
@@ -223,7 +223,7 @@ sifdma_reset(void)
 int
 sifcmd_init(void)
 {
-	
+
 	return CALL(int, 32, 0);
 }
 
@@ -279,7 +279,7 @@ sifcmd_establish(sifcmd_sw_t sw, struct sifcmd_callback_holder *holder)
 		func:	holder->func,
 		arg:	holder->arg,
 	};
-	
+
 	CALL(void, 36, &sifbios_arg);
 }
 
@@ -448,7 +448,7 @@ sifrpc_register_service(struct sifrpc_server_system *queue,
 		cancel_arg:	cancel_arg,
 		receive_queue:	queue,
 	};
-	
+
 	CALL(void, 55, &sifbios_arg);
 }
 
@@ -524,3 +524,4 @@ iopmem_free(paddr_t addr)
 
 	return (result);
 }
+#endif

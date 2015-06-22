@@ -27,6 +27,10 @@
  */
 
 #include <sys/cdefs.h>
+#include <sys/param.h>
+
+#if 0
+#include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: interrupt.c,v 1.11 2014/03/31 11:25:49 martin Exp $");
 
 #include "debug_playstation2.h"
@@ -144,7 +148,7 @@ cpu_intr(u_int32_t status, u_int32_t cause, u_int32_t pc, u_int32_t ipending)
 	if (ipending & MIPS_INT_MASK_0) {
 		intc_intr(md_imask);
 	}
-	
+
 	if (ipending & MIPS_INT_MASK_1) {
 		_playstation2_evcnt.dmac.ev_count++;
 		dmac_intr(md_imask);
@@ -251,7 +255,7 @@ _sif_call_end(void)
 	md_imask = _sif_call_env.imask;
 	md_imask_update();
 	mips_cp0_status_write(_sif_call_env.sr);
-	
+
 	_intr_resume(s);
 }
 
@@ -284,3 +288,4 @@ _debug_print_intr(const char *ident)
 }
 #endif /* INTR_DEBUG */
 
+#endif

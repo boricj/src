@@ -25,7 +25,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#if 0
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: bus_space.c,v 1.10 2014/07/04 07:51:14 martin Exp $");
 
@@ -41,10 +41,10 @@ __KERNEL_RCSID(0, "$NetBSD: bus_space.c,v 1.10 2014/07/04 07:51:14 martin Exp $"
 int	bus_space_debug = 0;
 #define	DPRINTF(fmt, args...)						\
 	if (bus_space_debug)						\
-		printf("%s: " fmt, __func__ , ##args) 
+		printf("%s: " fmt, __func__ , ##args)
 #define	DPRINTFN(n, arg)						\
 	if (bus_space_debug > (n))					\
-		printf("%s: " fmt, __func__ , ##args) 
+		printf("%s: " fmt, __func__ , ##args)
 #else
 #define	DPRINTF(arg...)		((void)0)
 #define DPRINTFN(n, arg...)	((void)0)
@@ -250,7 +250,7 @@ _default_alloc(void *t, bus_addr_t rstart, bus_addr_t rend,
 	base = ex->ex_start;
 
 	error = extent_alloc_subregion(ex, rstart + base, rend + base, size,
-	    alignment, boundary, 
+	    alignment, boundary,
 	    EX_FAST | EX_NOWAIT | EX_MALLOCOK,
 	    &bpa);
 
@@ -274,7 +274,7 @@ _default_free(void *t, bus_space_handle_t bsh, bus_size_t size)
 {
 	struct playstation2_bus_space *pbs = t;
 	struct extent *ex = pbs->pbs_extent;
-	
+
 	if (ex != 0)
 		_default_unmap(t, bsh, size);
 }
@@ -302,3 +302,4 @@ _default_vaddr(void *t, bus_space_handle_t h)
 {
 	return (void *)h;
 }
+#endif

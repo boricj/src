@@ -118,6 +118,7 @@ mips_fpu_state_save(lwp_t *l)
 	/*
 	 * save FPCSR and FP register values.
 	 */
+#if !defined(MIPS3_5900)
 #if !defined(__mips_o32)
 	if (tf->tf_regs[_R_SR] & MIPS3_SR_FR) {
 		KASSERT(_MIPS_SIM_NEWABI_P(l->l_proc->p_md.md_abi));
@@ -198,6 +199,9 @@ mips_fpu_state_save(lwp_t *l)
 			"swc1	$f31, (31*%d1)(%0)	;"
 		".set reorder" :: "r"(fp), "i"(4));
 	}
+#else
+	(void)fp;
+#endif
 	/*
 	 * stop COP1
 	 */
@@ -244,6 +248,7 @@ mips_fpu_state_load(lwp_t *l, u_int flags)
 	/*
 	 * load FP registers and establish processes' FP context.
 	 */
+#if !defined(MIPS3_5900)
 #if !defined(__mips_o32)
 	if (tf->tf_regs[_R_SR] & MIPS3_SR_FR) {
 		KASSERT(_MIPS_SIM_NEWABI_P(l->l_proc->p_md.md_abi));
@@ -326,7 +331,6 @@ mips_fpu_state_load(lwp_t *l, u_int flags)
 		    : "r"(fp), "i"(4));
 		fpcsr = ((int *)fp)[32];
 	}
-
 	/*
 	 * load FPCSR and stop COP1 again
 	 */
@@ -340,6 +344,10 @@ mips_fpu_state_load(lwp_t *l, u_int flags)
 		".set reorder"		"\n\t"
 	    ::	"r"(fpcsr &~ MIPS_FPU_EXCEPTION_BITS), "r"(status),
 		"n"(MIPS_COP_0_STATUS));
+#else
+	(void)fp;
+	(void)fpcsr;
+#endif
 }
 
 void

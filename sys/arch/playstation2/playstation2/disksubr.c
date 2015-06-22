@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
+#if 1
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: disksubr.c,v 1.19 2014/07/04 08:51:15 martin Exp $");
 
@@ -43,7 +43,7 @@ __KERNEL_RCSID(0, "$NetBSD: disksubr.c,v 1.19 2014/07/04 08:51:15 martin Exp $")
 static struct mbr_partition *
 mbr_findslice(struct mbr_partition* dp, struct buf *bp);
 
-/* 
+/*
  * Scan MBR for NetBSD partittion.  Return NO_MBR_SIGNATURE if no MBR found
  * Otherwise, copy valid MBR partition-table into dp, and if a NetBSD
  * partition is found, return a pointer to it; else return  NULL.
@@ -176,7 +176,7 @@ readdisklabel(dev_t dev, void (*strat)(struct buf *), struct disklabel *lp,
 				/* update disklabel with details */
 				lp->d_partitions[2].p_size =
 				    dp->mbrp_size;
-				lp->d_partitions[2].p_offset = 
+				lp->d_partitions[2].p_offset =
 				    dp->mbrp_start;
 			}
 		}
@@ -390,3 +390,4 @@ done:
 	brelse(bp, 0);
 	return (error);
 }
+#endif
