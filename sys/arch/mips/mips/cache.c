@@ -103,6 +103,10 @@ __KERNEL_RCSID(0, "$NetBSD: cache.c,v 1.50 2015/06/10 22:40:37 matt Exp $");
 #endif
 #endif
 
+#ifdef MIPS3_5900
+#include <mips/cache_r5900.h>
+#endif /* MIPS3_5900 */
+
 struct mips_cache_info mips_cache_info;
 struct mips_cache_ops mips_cache_ops;
 
@@ -178,7 +182,7 @@ mips_config_cache(void)
 	struct mips_cache_ops * const mco = &mips_cache_ops;
 #endif
 	const mips_prid_t cpu_id = mips_options.mips_cpu_id;
-	
+
 #if defined(MIPS1) || defined(MIPS3) || defined(MIPS4)
 	if (MIPS_PRID_CID(cpu_id) == MIPS_PRID_CID_PREHISTORIC)
 		mips_config_cache_prehistoric();
@@ -625,6 +629,41 @@ primary_cache_is_2way:
 		uvmexp.ncolors = mci->mci_pdcache_ways;
 		break;
 #endif
+
+#if defined(MIPS3_5900)
+	case MIPS_R5900:
+		/* cache spec */
+		mci->mci_picache_ways = 2;
+		mci->mci_pdcache_ways = 2;
+		mci->mci_picache_size = CACHE_R5900_SIZE_I;
+		mci->mci_picache_line_size = CACHE_R5900_LSIZE_I;
+		mci->mci_pdcache_size = CACHE_R5900_SIZE_D;
+		mci->mci_pdcache_line_size = CACHE_R5900_LSIZE_D;
+		mci->mci_cache_alias_mask =
+		    ((mci->mci_pdcache_size / mci->mci_pdcache_ways) - 1) &
+		    ~(PAGE_SIZE - 1);
+		mci->mci_cache_prefer_mask =
+		    max(mci->mci_pdcache_size, mci->mci_picache_size) - 1;
+		/* cache ops */
+		mco->mco_icache_sync_all =
+		    r5900_icache_sync_all_64;
+		mco->mco_icache_sync_range =
+		    r5900_icache_sync_range_64;
+		mco->mco_icache_sync_range_index =
+		    r5900_icache_sync_range_index_64;
+		mco->mco_pdcache_wbinv_all =
+		    r5900_pdcache_wbinv_all_64;
+		mco->mco_pdcache_wbinv_range =
+		    r5900_pdcache_wbinv_range_64;
+		mco->mco_pdcache_wbinv_range_index =
+		    r5900_pdcache_wbinv_range_index_64;
+		mco->mco_pdcache_inv_range =
+		    r5900_pdcache_inv_range_64;
+		mco->mco_pdcache_wb_range =
+		    r5900_pdcache_wb_range_64;
+		break;
+#endif /* MIPS3_5900 */
+
 #endif /* MIPS3 || MIPS4 */
 	default:
 		panic("can't handle primary cache on impl 0x%x",
@@ -963,7 +1002,7 @@ mips3_get_cache_config(int csizebase)
 		break;
 	}
 
-	/* 
+	/*
  	 * If CPU has a software-enabled L2 cache, check both if it's
 	 * present and if it's enabled before making assumptions the
 	 * L2 is usable.  If the L2 is disabled, we treat it the same
@@ -972,7 +1011,7 @@ mips3_get_cache_config(int csizebase)
 	if ((config & MIPS3_CONFIG_SC) == 0) {
 		if (has_sdcache_enable == 0 ||
 		    (has_sdcache_enable && (config & MIPS3_CONFIG_SE))) {
-			mci->mci_sdcache_line_size = 
+			mci->mci_sdcache_line_size =
 				MIPS3_CONFIG_CACHE_L2_LSIZE(config);
 			if ((config & MIPS3_CONFIG_SS) == 0)
 				mci->mci_scache_unified = true;

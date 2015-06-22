@@ -27,6 +27,8 @@ file arch/playstation2/playstation2/machdep.c
 
 file arch/mips/mips/mips3_clock.c
 file arch/mips/mips/mips3_clockintr.c
+file arch/mips/mips/mips5900_subr.S
+file arch/mips/mips/cache_r5900.c
 
 # file dev/bus_dma/bus_dmamem_common.c
 
