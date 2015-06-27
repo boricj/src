@@ -42,5 +42,7 @@ __KERNEL_RCSID(0, "$NetBSD: clock.c,v 1.11 2014/11/20 16:34:25 christos Exp $");
 void
 cpu_initclocks(void)
 {
+	curcpu()->ci_cpu_freq = 294912000;
+
 	mips3_initclocks();
 }

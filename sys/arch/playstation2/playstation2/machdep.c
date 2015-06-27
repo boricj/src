@@ -118,10 +118,25 @@ mach_init(void)
 void
 cpu_startup(void)
 {
+	vaddr_t minaddr, maxaddr;
+
 	/*
 	* Do the common startup items.
 	*/
 	cpu_startup_common();
+
+	minaddr = 0;
+	/*
+	 * Allocate a submap for physio.
+	 */
+	phys_map = uvm_km_suballoc(kernel_map, &minaddr, &maxaddr,
+	    VM_PHYS_SIZE, 0, false, NULL);
+
+	/*
+	 * (No need to allocate an mbuf cluster submap.  Mbuf clusters
+	 * are allocated via the pool allocator, and we use KSEG to
+	 * map those pages.)
+	 */
 
 	splsched();
 }
