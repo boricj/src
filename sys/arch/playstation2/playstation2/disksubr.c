@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#if 1
+
 #include <sys/cdefs.h>
 __KERNEL_RCSID(0, "$NetBSD: disksubr.c,v 1.19 2014/07/04 08:51:15 martin Exp $");
 
@@ -390,4 +390,3 @@ done:
 	brelse(bp, 0);
 	return (error);
 }
-#endif

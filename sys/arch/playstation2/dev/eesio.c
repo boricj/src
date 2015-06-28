@@ -9,9 +9,9 @@
 static int eesio_pool;
 
 static void eesiocninit(struct consdev *);
-static int  eesiocngetc (dev_t);
-static void eesiocnputc (dev_t, int);
-static void eesiocnpollc (dev_t, int);
+static int  eesiocngetc(dev_t);
+static void eesiocnputc(dev_t, int);
+static void eesiocnpollc(dev_t, int);
 
 struct consdev eesiocons = {
 	NULL, eesiocninit, eesiocngetc, eesiocnputc, eesiocnpollc, NULL, NULL, NULL,

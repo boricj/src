@@ -157,10 +157,10 @@
 /*
  * Use 64bit cp0 instructions?
  */
-#if (MIPS3 + MIPS64 + MIPS64R2) > 0
+#if (MIPS3 + MIPS64 + MIPS64R2) > 0 && !defined(MIPS3_5900)
 #define	USE_64BIT_INSTRUCTIONS
 #define	USE_64BIT_CP0_FUNCTIONS
-#elif (MIPS32 + MIPS32R2) > 0
+#elif (MIPS32 + MIPS32R2) > 0 || defined(MIPS3_5900)
 #ifdef _LP64
 #error	MIPS32 and MIPS32R2 can't run 64-bit kernels.
 #endif
@@ -332,7 +332,7 @@
  * Loongson2 processors don't have separate tlbmiss and xtlbmiss handlers;
  * so we have to check for useg addresses in tlb_miss. The good news is that
  * we can use 64 intructions form tlbmiss instead of 32.
- * 
+ *
  *----------------------------------------------------------------------------
  */
 #ifdef MIPS3_LOONGSON2
