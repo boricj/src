@@ -6,12 +6,15 @@
 
 #include "../dev/eesio.h"
 
+static int eesio_pool;
+
 static void eesiocninit(struct consdev *);
 static int  eesiocngetc (dev_t);
 static void eesiocnputc (dev_t, int);
+static void eesiocnpollc (dev_t, int);
 
 struct consdev eesiocons = {
-	NULL, eesiocninit, eesiocngetc, eesiocnputc, NULL, NULL, NULL, NULL,
+	NULL, eesiocninit, eesiocngetc, eesiocnputc, eesiocnpollc, NULL, NULL, NULL,
 	NODEV, CN_NORMAL
 };
 
@@ -33,11 +36,18 @@ void eesiocninit(struct consdev *c)
 int eesiocngetc(dev_t d)
 {
 	int c;
-	if (*(volatile uint32_t*)(SIO_BASE+SIO_ISR) & 0xf00) {
-		c = *(volatile int8_t*)(SIO_BASE+SIO_RXFIFO);
-		*(volatile uint32_t*)(SIO_BASE+SIO_ISR) = 7;
-		return c;
+
+	while (1) {
+		if (*(volatile uint32_t*)(SIO_BASE+SIO_ISR) & 0xf00) {
+			c = *(volatile int8_t*)(SIO_BASE+SIO_RXFIFO);
+			*(volatile uint32_t*)(SIO_BASE+SIO_ISR) = 7;
+			return c;
+		}
+
+		if (eesio_pool == 0)
+			break;
 	}
+
 	return -1;
 }
 
@@ -45,4 +55,9 @@ void eesiocnputc(dev_t d, int c)
 {
 	while ((*(volatile uint32_t*)(SIO_BASE+SIO_ISR) & 0xf000) == 0x8000);
 		*(volatile int8_t*)(SIO_BASE+SIO_TXFIFO) = (int8_t)c;
+}
+
+void eesiocnpollc(dev_t d, int c)
+{
+	eesio_pool = c;
 }
