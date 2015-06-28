@@ -84,13 +84,8 @@ mach_init(void)
 	printf("Memory size: 0x%08x\n", memsize);
 	physmem = btoc(memsize);
 
-	/*
-	 * memory is at 0x20000000 with first 256MB mirrored to 0x00000000 so
-	 * we can see them through KSEG*
-	 * assume 1GB for now, the SoC can theoretically support up to 3GB
-	 */
-	mem_clusters[0].start = PAGE_SIZE;
-	mem_clusters[0].size = memsize - PAGE_SIZE - BOOTINFO_BLOCK_SIZE;
+	mem_clusters[0].start = 0;
+	mem_clusters[0].size = memsize - BOOTINFO_BLOCK_SIZE;
 	mem_cluster_cnt = 1;
 
 	/*
